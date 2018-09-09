@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Weather Forecast | ARIK</title>
+	<link rel="shortcut icon" href="http://www.iconj.com/ico/s/d/sd3m595q4j.ico" type="image/x-icon" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+	<script src="http://www.chartjs.org/dist/2.6.0/Chart.bundle.js"></script>
+	<script src="http://www.chartjs.org/samples/2.6.0/utils.js"></script>
+	<style type="text/css">
+	* {
+		margin: 0;
+		padding: 0;
+	}
+
+	body { 
+	  background: url('http://i64.tinypic.com/2llyjrm.jpg') no-repeat center center fixed;
+	  background-size: cover;
+	  width: 100%;
+	  height: 100vh;
+	}
+	</style>
+</head>
+<body>
+<style type="text/css">
+	.my-dark {
+		/*background-color: #00100 !important;*/
+		background: rgba(0, 0, 0, 0.1);
+	}
+</style>
+<nav class="navbar navbar-expand-sm my-dark">
+  <a class="navbar-brand" href="#" style="text-decoration: none; color: #fff;">
+	<img src="https://image.flaticon.com/icons/png/512/25/25290.png" alt="Logo" style="width:40px;"><strong style="font-size: 1.2em;"> Weathery</strong>
+  </a>
+  <ul class="navbar-nav ml-auto">
+    <li class="nav-item active">
+      <a class="nav-link lead" style="color: #fff;">
+      	<span id="time"></span> | <span id="dated"></span>
+      </a>
+    </li>
+	</ul>
+</nav>
+<script type="text/javascript">
+	var d1 = new Date();
+	var d2 = new Date();
+	document.getElementById("time").innerHTML = d1.toDateString();
+	document.getElementById("dated").innerHTML = d2.toTimeString();
+</script>
+<style type="text/css">
+	#weather {
+		border: 2px solid #fff;
+		border-radius: 6px;
+		color: white;
+	}
+	#w-img {
+		max-width: 160px;
+		max-height: 125px;
+		background: #00010;
+	}
+	#body {
+		border-top: 1px solid #fff;
+	}
+	#body div div span {
+		border-bottom: 1px solid #fff;
+	}
+	#id_city {
+		background: rgba(255, 255, 255, 0.1);
+		color: white;
+	}
+</style>
+<div class="container" style="margin-top: 3.9rem;">
+	<div class="row justify-content-center p-2">
+		<!-- SEARCH -->
+		<div class="col-sm-7 col-lg-7 col-xl-7">
+			<form method="POST">
+				{% load widget_tweaks %}
+					{% csrf_token %}
+				<div class="input-group mb-3">
+						{% for field in form.visible_fields %}
+							{% render_field field class="form-control" placeholder=field.label aria-label="City" aria-describedby="location"%}
+						{% endfor %}
+					<div class="input-group-append">
+					    <button class="btn btn-outline-light" type="submit">Search</button>
+					</div>
+				</div>
+			</form>
+		</div>
+		{% if flag %}
+		<div class="col-sm-7 col-lg-7 col-xl-7" id="weather">
+			<div id="head" class="text-center">
+				<h1 class="display-4">{{ address }}</h1>
+				<div class="row">
+					<div id="icon-text" class="col-6">
+						<img src="{{ query.get_url }}" id="w-img">
+						<p class="lead" style="font-size: 2.5em;">{{ curr_weather_text }}</p>
+					</div>
+					<div id="temperature" class="col-6">
+						<p class="lead" style="font-size: 5em;">{{ curr_weather_temp }}&deg;C</p>
+					</div>
+				</div>
+			</div>
+			<div id="body">
+				<div class="row text-center" style="font-size: 1.5rem;">
+					<div id="sun-prop" class="col-4">
+						<span>Astronomy</span><br>
+						{{ atmosphere|safe }}
+					</div>
+					<div id="windy" class="col-4">
+						<span>Wind Speed</span>
+						<p>{{ wind_speed }} KM/h</p>
+					</div>
+					<div id="windy-dir" class="col-4">
+						<span>Wind Direction</span>
+						<p>{{ wind_direction }}</p>
+						<a data-toggle="modal" data-target="#myModal" href="#" style="bottom: 0; color: yellow; font-size: 13px;">Forecasts Here</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+</div>
+<style type="text/css">
+	@media screen and (max-width: 1024px) {
+    .yourClass {
+        display: none !important;
+    }
+}
+</style>
+
+<div class="modal fade" id="myModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Weather Forecast</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+      	<p class="lead">Forecast Graph is best viewed in PCs, Laptops, and Mac OS. Please switch to the same if not displayed.</p>
+        <canvas id="canvas" class="yourClass"></canvas>
+      </div>
+	
+	  <div class="modal-body table-responsive">
+		<table class="table table-hover" style="table-layout: fixed; width: 100%;">
+			<thead class="thead-dark">
+				<tr>
+					<th>Date - Day</th>
+					<th>High</th>
+					<th>Low</th>
+					<th>Condition</th>
+				</tr>
+			</thead>
+			<tbody>
+			<!-- date; high; low; text -->
+			{% for a,b,c,d in zip %}
+				<tr>
+					<td>{{ a }}</td>
+					<td>{{ b }}</td>
+					<td>{{ c }}</td>
+					<td>{{ d }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+      </div>
+      <!-- Modal footer -->
+      <div class="modal-footer">
+      	
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+	var color = Chart.helpers.color;
+	var lineChartData = {
+        labels: {{ temp_forecast_dates|safe }},
+        datasets: [{
+            label: "HIGH",
+            borderColor: window.chartColors.red,
+            backgroundColor: color(window.chartColors.orange).alpha(0.2).rgbString(),
+            fill: '1',
+            data: {{ temp_forecast_high_data1|safe }},
+            borderWidth: 3,
+            pointBorderWidth: 2,
+            lineTension: 0,
+            pointBorderColor: '#000',
+            yAxisID: "y-axis-1",
+        }, {
+            label: "LOW",
+            borderColor: window.chartColors.blue,
+            //backgroundColor: color("#00FFFF").alpha(0.2).rgbString(),
+            fill: false,
+            data: {{ temp_forecast_low_data2|safe }},
+            borderWidth: 3,
+            pointBorderWidth: 2,
+            lineTension: 0,
+            pointBorderColor: '#000',
+            yAxisID: "y-axis-1"
+        }]
+    };
+
+    window.onload = function() {
+        var ctx = document.getElementById("canvas").getContext("2d");
+        window.myLine = Chart.Line(ctx, {
+            data: lineChartData,
+            options: {
+                responsive: true,
+                hoverMode: 'index',
+                stacked: false,
+                tooltips: {
+                	titleFontColor: '#000',
+                	bodyFontColor: '#000',
+			      	backgroundColor: 'transparent',
+			        displayColors: false,
+			        bodyFontSize: 14,
+			        callbacks: {
+			          label: function(tooltipItems, data) { 
+			            return tooltipItems.yLabel + '°C';
+			          }
+			        }
+			      },
+                title:{
+                    display: true,
+                    text:"Temperature Forecast Data in {{ address }}"
+                },
+                scales: {
+                    yAxes: [{
+                        type: "linear", // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+                        display: true,
+                        position: "left",
+                        id: "y-axis-1",
+                        ticks: {
+                        	//display: true,
+                        	//autoSkip: false,
+                        	max: {{ mini_temp }},
+                        	min: {{ maxi_temp }},
+                        	stepSize: 2,
+                        }
+                    }],
+                }
+            }
+        });
+    };
+</script>
+
+<p class="text-center" style="color: #fff; bottom: 0; padding: 0; margin: 0;">&copy; Arik Sarkar 2018</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+        history.go(1);
+    };
+</script>
+</body>
+</html>
